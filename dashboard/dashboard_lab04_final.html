@@ -17,8 +17,8 @@
   --border:  #1c2840;
   --border2: #243350;
   --ink:     #dce8f5;
-  --muted:   #ffffff;
-  --dim:     #2a3d55;
+  --muted:   #b7c5d7;
+  --dim:     #60738d;
   --cyan:    #00d4ff;
   --cyan2:   #00a8cc;
   --green:   #00e5a0;
@@ -55,7 +55,7 @@ body::before {
 /* ── HEADER ── */
 header {
   position: relative; z-index: 1;
-  padding: 52px 52px 86px;
+  padding: 44px 52px 64px;
   border-bottom: 1px solid var(--border);
   background:
     radial-gradient(ellipse 80% 60% at 10% 0%, rgba(0,212,255,0.06) 0%, transparent 60%),
@@ -88,9 +88,9 @@ header p { color: var(--muted); font-size: 14px; line-height: 1.65; max-width: 5
 .header-stats {
   display: flex; gap: 1px; background: var(--border);
   border: 1px solid var(--border); border-radius: 6px;
-  overflow: hidden; flex-shrink: 0;
+  overflow: hidden; flex-shrink: 0; padding: 0;
 }
-.hstat { padding: 16px 24px; background: var(--panel); text-align: center; }
+.hstat { padding: 16px 24px; background: var(--panel); text-align: center; border-radius: 0; }
 .hstat-val { font-family: var(--mono); font-size: 22px; font-weight: 700; color: var(--cyan); display: block; }
 .hstat-lbl { font-size: 10px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); margin-top: 4px; display: block; }
 
@@ -115,14 +115,14 @@ header p { color: var(--muted); font-size: 14px; line-height: 1.65; max-width: 5
 .nav-sep { margin-left: auto; font-family: var(--mono); font-size: 10px; color: var(--dim); letter-spacing: 1px; }
 
 /* ── MAIN ── */
-main { position: relative; z-index: 1; max-width: 1280px; margin: -46px auto 0; padding: 0 28px 80px; }
+main { position: relative; z-index: 1; max-width: 1280px; margin: -36px auto 0; padding: 0 28px 80px; }
 
 /* ── SECTION ── */
-.section { margin-bottom: 20px; border: 1px solid var(--border); border-radius: 4px; background: var(--panel); overflow: hidden; }
+.section { margin-bottom: 20px; border: 1px solid var(--border); border-radius: 6px; background: var(--panel); overflow: hidden; box-shadow: none; }
 
 .section-header {
   display: flex; align-items: center; justify-content: space-between; gap: 24px;
-  padding: 20px 24px; border-bottom: 1px solid var(--border);
+  padding: 18px 22px; border-bottom: 1px solid var(--border);
   background: rgba(255,255,255,0.015);
 }
 .section-title-wrap { display: flex; align-items: center; gap: 12px; }
@@ -138,12 +138,12 @@ main { position: relative; z-index: 1; max-width: 1280px; margin: -46px auto 0; 
 .section-num.amber  { color: var(--amber);  background: rgba(255,184,0,0.08);  border-color: rgba(255,184,0,0.2); }
 .section-num.red    { color: var(--red);    background: rgba(255,69,96,0.08);   border-color: rgba(255,69,96,0.2); }
 
-.section-title { font-size: 15px; font-weight: 700; color: var(--ink); letter-spacing: -0.2px; }
+.section-title { font-size: 18px; font-weight: 800; color: var(--ink); letter-spacing: -0.2px; }
 .section-desc  { font-size: 12px; color: var(--muted); line-height: 1.5; max-width: 400px; text-align: right; }
-.section-body  { padding: 20px 24px; }
+.section-body  { padding: 18px 22px; }
 
 /* ── HYPOTHESIS BOX ── */
-.hyp-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--border); margin-bottom: 20px; }
+.hyp-grid { display: none; }
 .hyp-box { padding: 16px 18px; background: var(--panel2); }
 .hyp-label {
   font-family: var(--mono); font-size: 9px; font-weight: 700;
@@ -165,8 +165,8 @@ main { position: relative; z-index: 1; max-width: 1280px; margin: -46px auto 0; 
 .verdict-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; box-shadow: 0 0 6px currentColor; background: currentColor; }
 
 /* ── METRIC PAIR ── */
-.metric-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--border); margin-bottom: 1px; }
-.mbox { padding: 16px 18px; background: var(--panel2); }
+.metric-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; background: transparent; margin-bottom: 14px; }
+.mbox { padding: 16px 18px; background: var(--panel2); border: 1px solid var(--border); border-radius: 6px; }
 .mbox-label { font-family: var(--mono); font-size: 9px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
 .mbox-nums { display: flex; align-items: baseline; gap: 10px; margin-bottom: 6px; }
 .mbox-before { font-family: var(--mono); font-size: 20px; font-weight: 700; color: var(--cyan); }
@@ -180,8 +180,8 @@ main { position: relative; z-index: 1; max-width: 1280px; margin: -46px auto 0; 
 .bar   { height: 100%; border-radius: 99px; }
 
 /* ── KPI CARDS ── */
-.cards { display: grid; grid-template-columns: repeat(4,1fr); gap: 1px; background: var(--border); border: 1px solid var(--border); border-radius: 4px; overflow: hidden; margin-bottom: 20px; }
-.card { padding: 20px; background: var(--panel2); position: relative; overflow: hidden; transition: background 0.15s; cursor: default; }
+.cards { display: grid; grid-template-columns: repeat(4,1fr); gap: 14px; background: transparent; border: 0; border-radius: 0; overflow: visible; margin-bottom: 18px; }
+.card { padding: 18px; background: var(--panel2); border: 1px solid var(--border); border-radius: 6px; position: relative; overflow: hidden; transition: background 0.15s; cursor: default; }
 .card:hover { background: #141c2b; }
 .card::after { content:""; position:absolute; top:0;left:0;right:0; height:2px; }
 .card.c-cyan::after   { background: linear-gradient(90deg, transparent, var(--cyan), transparent); }
@@ -197,10 +197,10 @@ main { position: relative; z-index: 1; max-width: 1280px; margin: -46px auto 0; 
 .card-sub { font-size: 11px; color: var(--dim); margin-top: 8px; }
 
 /* ── GRID ── */
-.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--border); margin-bottom: 1px; }
-.grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1px; background: var(--border); margin-bottom: 1px; }
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; background: transparent; margin-bottom: 14px; }
+.grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; background: transparent; margin-bottom: 14px; }
 
-.chart-cell { background: var(--panel2); padding: 20px; }
+.chart-cell { background: var(--panel2); padding: 18px; border: 1px solid var(--border); border-radius: 6px; }
 .chart-cell-title { font-family: var(--mono); font-size: 11px; font-weight: 700; letter-spacing: 0.5px; color: var(--ink); margin-bottom: 4px; }
 .chart-cell-sub   { font-size: 11px; color: var(--muted); margin-bottom: 16px; line-height: 1.4; }
 
@@ -221,20 +221,14 @@ td.mono { font-family: var(--mono); font-size: 12px; }
 
 /* ── INSIGHT ── */
 .insight {
-  display: flex; gap: 12px; align-items: flex-start;
-  padding: 14px 16px; margin-top: 1px;
-  background: rgba(0,229,160,0.04);
-  border-top: 1px solid rgba(0,229,160,0.15);
-  font-size: 12px; color: #7ecfb0; line-height: 1.6;
+  display: none;
 }
-.insight.warn { background: rgba(255,184,0,0.04); border-top-color: rgba(255,184,0,0.2); color: #d4a840; }
-.insight.info { background: rgba(255,69,96,0.04); border-top-color: rgba(255,69,96,0.2); color: #f08090; }
 .insight-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; margin-top: 5px; background: var(--green); box-shadow: 0 0 6px var(--green); }
 .insight-dot.warn { background: var(--amber); box-shadow: 0 0 6px var(--amber); }
 .insight-dot.info { background: var(--red); box-shadow: 0 0 6px var(--red); }
 
 /* ── FOOTER ── */
-footer { position: relative; z-index: 1; text-align: center; padding: 28px; border-top: 1px solid var(--border); font-family: var(--mono); font-size: 10px; letter-spacing: 1px; color: var(--dim); }
+footer { position: relative; z-index: 1; text-align: center; padding: 28px; border-top: 1px solid var(--border); font-family: var(--mono); font-size: 10px; letter-spacing: 1px; color: var(--dim); background: var(--bg); }
 
 /* ── TIMELINE ── */
 .timeline { position: relative; padding: 8px 0 4px; }
@@ -305,7 +299,7 @@ footer { position: relative; z-index: 1; text-align: center; padding: 28px; bord
 <header>
   <div class="header-inner">
     <div class="header-left">
-      <div class="header-tag">// lab04 &middot; experimentacao em engenharia de software &middot; 2025</div>
+      <div class="header-tag">Lab04 &middot; experimentacao em engenharia de software &middot; 2025</div>
       <h1>Impacto da <span>IA</span> em<br>Repositorios GitHub</h1>
       <p>Analise de 105 repositorios Python — classificacao por nivel de evidencia de uso de IA e comparacao de metricas de issues, retrabalho corretivo e verbosidade de commits.</p>
     </div>
@@ -320,12 +314,12 @@ footer { position: relative; z-index: 1; text-align: center; padding: 28px; bord
 
 <nav class="sticky-nav">
   <div class="nav-inner">
-    <a class="nav-link" href="#metodologia">00 // Metodologia</a>
-    <a class="nav-link active" href="#dataset">01 // Dataset</a>
-    <a class="nav-link" href="#rq1">02 // RQ1 Issues</a>
-    <a class="nav-link" href="#rq2">03 // RQ2 Retrabalho</a>
-    <a class="nav-link" href="#rq3">04 // RQ3 Verbosidade</a>
-    <a class="nav-link" href="#grupos">05 // Por Grupo</a>
+    <a class="nav-link" href="#metodologia">00 Metodologia</a>
+    <a class="nav-link active" href="#dataset">01 Dataset</a>
+    <a class="nav-link" href="#rq1">02 RQ1 Issues</a>
+    <a class="nav-link" href="#rq2">03 RQ2 Retrabalho</a>
+    <a class="nav-link" href="#rq3">04 RQ3 Verbosidade</a>
+    <a class="nav-link" href="#grupos">05 Por Grupo</a>
     <span class="nav-sep">105 repos &middot; Python &middot; GitHub</span>
   </div>
 </nav>
@@ -438,12 +432,12 @@ footer { position: relative; z-index: 1; text-align: center; padding: 28px; bord
 
       <div class="grid-2" style="margin-bottom:1px">
         <div class="chart-cell">
-          <div class="chart-cell-title">// Distribuicao por Grupo de IA</div>
+          <div class="chart-cell-title">Distribuicao por Grupo de IA</div>
           <div class="chart-cell-sub">Baixo (2-3) = 55 repos &middot; Medio (4-6) = 32 &middot; Alto (7+) = 18</div>
           <div style="height:220px;position:relative"><canvas id="chartDonut"></canvas></div>
         </div>
         <div class="chart-cell">
-          <div class="chart-cell-title">// Distribuicao de AI Scores (2–13)</div>
+          <div class="chart-cell-title">Distribuicao de AI Scores (2–13)</div>
           <div class="chart-cell-sub">Score 3 predomina (47 repos); Alto score concentrado em poucos projetos</div>
           <div style="height:220px;position:relative"><canvas id="chartScores"></canvas></div>
         </div>
@@ -451,7 +445,7 @@ footer { position: relative; z-index: 1; text-align: center; padding: 28px; bord
 
       <div class="grid-2" style="margin-bottom:1px">
         <div class="chart-cell">
-          <div class="chart-cell-title">// Tipos de Evidencia de IA Detectados</div>
+          <div class="chart-cell-title">Tipos de Evidencia de IA Detectados</div>
           <div class="chart-cell-sub">Total de ocorrencias por tipo — um repo pode ter multiplas evidencias</div>
           <div style="height:160px;position:relative"><canvas id="chartEvidencias"></canvas></div>
         </div>
@@ -510,7 +504,7 @@ footer { position: relative; z-index: 1; text-align: center; padding: 28px; bord
       <!-- MÉTRICAS -->
       <div class="metric-pair">
         <div class="mbox">
-          <div class="mbox-label">M1 // Taxa de Issues por Mes</div>
+          <div class="mbox-label">Taxa de Issues por Mes</div>
           <div class="mbox-nums">
             <span class="mbox-before">66.50</span>
             <span class="mbox-arrow">→</span>
@@ -521,7 +515,7 @@ footer { position: relative; z-index: 1; text-align: center; padding: 28px; bord
           <div class="track"><div class="bar" style="width:28%;background:linear-gradient(90deg,var(--green),var(--cyan))"></div></div>
         </div>
         <div class="mbox">
-          <div class="mbox-label">M2 // Tempo Medio de Vida das Issues</div>
+          <div class="mbox-label">Tempo Medio de Vida das Issues</div>
           <div class="mbox-nums">
             <span class="mbox-before">9.898h</span>
             <span class="mbox-arrow">→</span>
@@ -536,12 +530,12 @@ footer { position: relative; z-index: 1; text-align: center; padding: 28px; bord
       <!-- GRÁFICOS -->
       <div class="grid-2" style="margin-top:1px">
         <div class="chart-cell">
-          <div class="chart-cell-title">// M1 — Taxa de Issues/mes: Antes vs Depois</div>
+          <div class="chart-cell-title">Taxa de Issues/mes: Antes vs Depois</div>
           <div class="chart-cell-sub">Mediana e media comparadas por periodo</div>
           <div style="height:200px;position:relative"><canvas id="chartRQ1Taxa"></canvas></div>
         </div>
         <div class="chart-cell">
-          <div class="chart-cell-title">// M2 — Tempo de Resolucao (horas): Antes vs Depois</div>
+          <div class="chart-cell-title">Tempo de Resolucao (horas): Antes vs Depois</div>
           <div class="chart-cell-sub">Mediana e media comparadas por periodo</div>
           <div style="height:200px;position:relative"><canvas id="chartRQ1Tempo"></canvas></div>
         </div>
@@ -584,7 +578,7 @@ footer { position: relative; z-index: 1; text-align: center; padding: 28px; bord
 
       <div class="metric-pair">
         <div class="mbox">
-          <div class="mbox-label">M1 // Proporcao de Commits Corretivos (fixes)</div>
+          <div class="mbox-label">Proporcao de Commits Corretivos (fixes)</div>
           <div class="mbox-nums">
             <span class="mbox-before">32.12%</span>
             <span class="mbox-arrow">→</span>
@@ -595,7 +589,7 @@ footer { position: relative; z-index: 1; text-align: center; padding: 28px; bord
           <div class="track"><div class="bar" style="width:72%;background:linear-gradient(90deg,var(--green),var(--cyan))"></div></div>
         </div>
         <div class="mbox">
-          <div class="mbox-label">M2 // Taxa de Commits de Revert</div>
+          <div class="mbox-label">Taxa de Commits de Revert</div>
           <div class="mbox-nums">
             <span class="mbox-before">1.10%</span>
             <span class="mbox-arrow">→</span>
@@ -609,12 +603,12 @@ footer { position: relative; z-index: 1; text-align: center; padding: 28px; bord
 
       <div class="grid-2" style="margin-top:1px">
         <div class="chart-cell">
-          <div class="chart-cell-title">// M1 — % Fixes: Antes vs Depois</div>
+          <div class="chart-cell-title">% Fixes: Antes vs Depois</div>
           <div class="chart-cell-sub">Mediana e media de commits corretivos por periodo</div>
           <div style="height:200px;position:relative"><canvas id="chartRQ2Fixes"></canvas></div>
         </div>
         <div class="chart-cell">
-          <div class="chart-cell-title">// M2 — % Reverts: Antes vs Depois</div>
+          <div class="chart-cell-title">% Reverts: Antes vs Depois</div>
           <div class="chart-cell-sub">Mediana e media de commits de revert por periodo</div>
           <div style="height:200px;position:relative"><canvas id="chartRQ2Reverts"></canvas></div>
         </div>
@@ -657,7 +651,7 @@ footer { position: relative; z-index: 1; text-align: center; padding: 28px; bord
 
       <div class="metric-pair">
         <div class="mbox">
-          <div class="mbox-label">M1 // Tamanho Medio do Commit (linhas)</div>
+          <div class="mbox-label">Tamanho Medio do Commit (linhas)</div>
           <div class="mbox-nums">
             <span class="mbox-before">193.79</span>
             <span class="mbox-arrow">→</span>
@@ -668,7 +662,7 @@ footer { position: relative; z-index: 1; text-align: center; padding: 28px; bord
           <div class="track"><div class="bar" style="width:55%;background:linear-gradient(90deg,var(--blue),var(--cyan))"></div></div>
         </div>
         <div class="mbox">
-          <div class="mbox-label">M2 // Complexidade do Codigo (Maintainability Index)</div>
+          <div class="mbox-label">Complexidade do Codigo (Maintainability Index)</div>
           <div class="mbox-nums">
             <span class="mbox-before">60.29</span>
             <span class="mbox-arrow">→</span>
@@ -682,12 +676,12 @@ footer { position: relative; z-index: 1; text-align: center; padding: 28px; bord
 
       <div class="grid-2" style="margin-top:1px">
         <div class="chart-cell">
-          <div class="chart-cell-title">// M1 — Linhas/Commit: Antes vs Depois</div>
+          <div class="chart-cell-title">Linhas/Commit: Antes vs Depois</div>
           <div class="chart-cell-sub">Mediana e media de linhas alteradas por commit</div>
           <div style="height:200px;position:relative"><canvas id="chartRQ3Linhas"></canvas></div>
         </div>
         <div class="chart-cell">
-          <div class="chart-cell-title">// M2 — Maintainability Index: Antes vs Depois</div>
+          <div class="chart-cell-title">Maintainability Index: Antes vs Depois</div>
           <div class="chart-cell-sub">MI medio e mediano — maior valor = mais manutenivel</div>
           <div style="height:200px;position:relative"><canvas id="chartRQ3MI"></canvas></div>
         </div>
@@ -695,7 +689,7 @@ footer { position: relative; z-index: 1; text-align: center; padding: 28px; bord
 
       <div class="insight warn">
         <div class="insight-dot warn"></div>
-        M1 confirma H1: commits ficam +12.2% maiores apos IA. M2 apresenta resultado misto: MI cai -2.98% (codigo ligeiramente menos manutenivel). A IA parece gerar commits de maior volume mas sem ganho de qualidade estrutural.
+        Os commits ficam +12.2% maiores apos IA, mas o MI cai -2.98% (codigo ligeiramente menos manutenivel). A IA parece gerar commits de maior volume, sem ganho claro de qualidade estrutural.
       </div>
 
     </div>
@@ -714,17 +708,17 @@ footer { position: relative; z-index: 1; text-align: center; padding: 28px; bord
 
       <div class="grid-3" style="margin-bottom:1px">
         <div class="chart-cell">
-          <div class="chart-cell-title">// Estrelas medianas por grupo</div>
+          <div class="chart-cell-title">Estrelas medianas por grupo</div>
           <div class="chart-cell-sub">Maior adocao correlaciona com maior popularidade</div>
           <div style="height:180px;position:relative"><canvas id="chartGrupoStars"></canvas></div>
         </div>
         <div class="chart-cell">
-          <div class="chart-cell-title">// Delta de Issues por grupo</div>
+          <div class="chart-cell-title">Delta de Issues por grupo</div>
           <div class="chart-cell-sub">Variacao mediana de issues abertas (RQ1)</div>
           <div style="height:180px;position:relative"><canvas id="chartGrupoIssues"></canvas></div>
         </div>
         <div class="chart-cell">
-          <div class="chart-cell-title">// Delta de MI por grupo</div>
+          <div class="chart-cell-title">Delta de MI por grupo</div>
           <div class="chart-cell-sub">Variacao mediana do Maintainability Index (RQ3)</div>
           <div style="height:180px;position:relative"><canvas id="chartGrupoMI"></canvas></div>
         </div>
@@ -732,7 +726,7 @@ footer { position: relative; z-index: 1; text-align: center; padding: 28px; bord
 
       <div style="margin-top:1px">
         <div class="chart-cell" style="border-top:1px solid var(--border)">
-          <div class="chart-cell-title">// Resumo: deltas por grupo — RQ1, RQ2 e RQ3</div>
+          <div class="chart-cell-title">Resumo: deltas por grupo — RQ1, RQ2 e RQ3</div>
           <div class="chart-cell-sub">Variacao mediana de issues, fixes e linhas/commit para cada nivel de adocao de IA</div>
           <div style="height:200px;position:relative"><canvas id="chartGrupoMulti"></canvas></div>
         </div>
@@ -743,7 +737,7 @@ footer { position: relative; z-index: 1; text-align: center; padding: 28px; bord
 
 </main>
 
-<footer>// LAB04 S03 &middot; EXPERIMENTACAO EM ENGENHARIA DE SOFTWARE &middot; 2025 &middot; andrexlazarini@gmail.com</footer>
+<footer>LAB04 S03 &middot; EXPERIMENTACAO EM ENGENHARIA DE SOFTWARE &middot; 2025 &middot; andrexlazarini@gmail.com</footer>
 
 <script>
 /* ── KPI COUNTERS ── */
@@ -768,13 +762,13 @@ window.addEventListener('load', () => {
 });
 
 /* ── CHART DEFAULTS ── */
-Chart.defaults.color = '#ffffff';
+Chart.defaults.color = '#b7c5d7';
 Chart.defaults.borderColor = '#1c2840';
 Chart.defaults.font.family = "'JetBrains Mono', monospace";
 Chart.defaults.font.size = 11;
 
 const C = { cyan:'#00d4ff', green:'#00e5a0', amber:'#ffb800', red:'#ff4560', purple:'#b44dff', blue:'#3b8eff' };
-const TT = { backgroundColor:'#0f1520', borderColor:'#1c2840', borderWidth:1, titleColor:'#dce8f5', bodyColor:'#ffffff', padding:10, cornerRadius:3 };
+const TT = { backgroundColor:'#0f1520', borderColor:'#1c2840', borderWidth:1, titleColor:'#dce8f5', bodyColor:'#b7c5d7', padding:10, cornerRadius:3 };
 const AN = { duration:900, easing:'easeOutQuart' };
 
 function pairBar(id, labels, before, after) {
@@ -791,7 +785,7 @@ function pairBar(id, labels, before, after) {
       plugins:{ legend:{ display:true, position:'top', labels:{ boxWidth:10, padding:14, font:{size:10,weight:'700'}, color:'#dce8f5' } }, tooltip:TT },
       scales:{
         x:{ grid:{display:false}, ticks:{color:'#dce8f5',font:{size:10}} },
-        y:{ grid:{color:'#1c2840'}, ticks:{color:'#ffffff',font:{size:10}} }
+        y:{ grid:{color:'#1c2840'}, ticks:{color:'#b7c5d7',font:{size:10}} }
       }
     }
   });
@@ -823,7 +817,7 @@ new Chart(document.getElementById('chartScores'), {
   },
   options:{ responsive:true, maintainAspectRatio:false, animation:AN,
     plugins:{ legend:{display:false}, tooltip:TT },
-    scales:{ x:{grid:{color:'#1c2840'},ticks:{color:'#ffffff',font:{size:10}}}, y:{grid:{color:'#1c2840'},ticks:{color:'#ffffff',font:{size:10}}} }
+    scales:{ x:{grid:{color:'#1c2840'},ticks:{color:'#b7c5d7',font:{size:10}}}, y:{grid:{color:'#1c2840'},ticks:{color:'#b7c5d7',font:{size:10}}} }
   }
 });
 
@@ -834,7 +828,7 @@ new Chart(document.getElementById('chartEvidencias'), {
   },
   options:{ responsive:true, maintainAspectRatio:false, animation:AN, indexAxis:'y',
     plugins:{ legend:{display:false}, tooltip:TT },
-    scales:{ x:{grid:{color:'#1c2840'},max:110,ticks:{color:'#ffffff',font:{size:10}}}, y:{grid:{display:false},ticks:{color:'#dce8f5',font:{size:10,weight:'700'}}} }
+    scales:{ x:{grid:{color:'#1c2840'},max:110,ticks:{color:'#b7c5d7',font:{size:10}}}, y:{grid:{display:false},ticks:{color:'#dce8f5',font:{size:10,weight:'700'}}} }
   }
 });
 
@@ -858,7 +852,7 @@ new Chart(document.getElementById('chartRQ3MI'), {
   },
   options:{ responsive:true, maintainAspectRatio:false, animation:AN,
     plugins:{ legend:{display:false}, tooltip:TT },
-    scales:{ x:{grid:{display:false},ticks:{color:'#dce8f5',font:{size:9}}}, y:{grid:{color:'#1c2840'},min:54,max:68,ticks:{color:'#ffffff',font:{size:10}}} }
+    scales:{ x:{grid:{display:false},ticks:{color:'#dce8f5',font:{size:9}}}, y:{grid:{color:'#1c2840'},min:54,max:68,ticks:{color:'#b7c5d7',font:{size:10}}} }
   }
 });
 
@@ -869,7 +863,7 @@ function singleBar(id, data, colors) {
     data:{ labels:['Baixo','Medio','Alto'], datasets:[{ data, backgroundColor:colors, borderRadius:3, borderSkipped:false }] },
     options:{ responsive:true, maintainAspectRatio:false, animation:AN,
       plugins:{ legend:{display:false}, tooltip:TT },
-      scales:{ x:{grid:{display:false},ticks:{color:'#dce8f5',font:{size:10}}}, y:{grid:{color:'#1c2840'},ticks:{color:'#ffffff',font:{size:10}}} }
+      scales:{ x:{grid:{display:false},ticks:{color:'#dce8f5',font:{size:10}}}, y:{grid:{color:'#1c2840'},ticks:{color:'#b7c5d7',font:{size:10}}} }
     }
   });
 }
@@ -888,7 +882,7 @@ new Chart(document.getElementById('chartGrupoMulti'), {
   },
   options:{ responsive:true, maintainAspectRatio:false, animation:AN,
     plugins:{ legend:{display:true,position:'top',labels:{boxWidth:10,padding:14,font:{size:10,weight:'700'},color:'#dce8f5'}}, tooltip:TT },
-    scales:{ x:{grid:{display:false},ticks:{color:'#dce8f5',font:{size:10}}}, y:{grid:{color:'#1c2840'},ticks:{color:'#ffffff',font:{size:10}}} }
+    scales:{ x:{grid:{display:false},ticks:{color:'#dce8f5',font:{size:10}}}, y:{grid:{color:'#1c2840'},ticks:{color:'#b7c5d7',font:{size:10}}} }
   }
 });
 

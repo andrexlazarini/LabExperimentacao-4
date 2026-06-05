@@ -1,0 +1,969 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Apresentação — Impacto da IA em Repositórios GitHub</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800;900&family=JetBrains+Mono:wght@400;600;700&display=swap');
+
+:root {
+  --bg:     #06080d;
+  --bg1:    #090d14;
+  --panel:  #0e1520;
+  --border: #1c2840;
+  --dim:    #243350;
+  --ink:    #dce8f5;
+  --muted:  #4e6480;
+  --cyan:   #00d4ff;
+  --green:  #00e5a0;
+  --amber:  #ffb800;
+  --red:    #ff4560;
+  --purple: #b44dff;
+  --blue:   #3b8eff;
+  --sans:   'Inter', system-ui, sans-serif;
+  --mono:   'JetBrains Mono', monospace;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { width: 100%; height: 100%; overflow: hidden; }
+
+body {
+  font-family: var(--sans);
+  background: var(--bg);
+  color: var(--ink);
+}
+
+/* ── GRID BACKGROUND ── */
+body::before {
+  content: "";
+  position: fixed; inset: 0;
+  background-image:
+    linear-gradient(rgba(0,212,255,0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,212,255,0.02) 1px, transparent 1px);
+  background-size: 56px 56px;
+  pointer-events: none; z-index: 0;
+}
+
+/* ── PROGRESS BAR ── */
+#progress-bar {
+  position: fixed; top: 0; left: 0;
+  height: 2px; background: var(--cyan);
+  transition: width 0.4s ease;
+  z-index: 999;
+  box-shadow: 0 0 8px var(--cyan);
+}
+
+/* ── CONTROLS ── */
+#controls {
+  position: fixed; bottom: 28px; left: 50%;
+  transform: translateX(-50%);
+  display: flex; align-items: center; gap: 16px;
+  z-index: 999;
+  background: rgba(9,13,20,0.85);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--border);
+  border-radius: 99px;
+  padding: 10px 20px;
+}
+
+.ctrl-btn {
+  width: 32px; height: 32px;
+  display: flex; align-items: center; justify-content: center;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  background: none;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 14px;
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
+}
+.ctrl-btn:hover { color: var(--cyan); border-color: var(--cyan); background: rgba(0,212,255,0.07); }
+
+#slide-counter {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--muted);
+  letter-spacing: 1px;
+  min-width: 52px;
+  text-align: center;
+}
+
+#timer-display {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--amber);
+  letter-spacing: 0.5px;
+}
+
+/* ── SLIDE CONTAINER ── */
+#slides {
+  position: relative; z-index: 1;
+  width: 100%; height: 100vh;
+  overflow: hidden;
+}
+
+.slide {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column;
+  padding: 0;
+  opacity: 0;
+  transform: translateX(60px);
+  transition: opacity 0.4s ease, transform 0.4s ease;
+  pointer-events: none;
+}
+
+.slide.active {
+  opacity: 1; transform: translateX(0);
+  pointer-events: auto;
+}
+
+.slide.exit {
+  opacity: 0; transform: translateX(-60px);
+}
+
+/* ── SLIDE HEADER ── */
+.slide-header {
+  padding: 28px 60px 18px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+  flex-shrink: 0;
+}
+
+.slide-num {
+  font-family: var(--mono);
+  font-size: 10px; font-weight: 700;
+  letter-spacing: 2px;
+  color: var(--cyan);
+  background: rgba(0,212,255,0.08);
+  border: 1px solid rgba(0,212,255,0.2);
+  padding: 3px 10px; border-radius: 3px;
+}
+
+.slide-num.green  { color: var(--green);  background: rgba(0,229,160,0.08);  border-color: rgba(0,229,160,0.2); }
+.slide-num.amber  { color: var(--amber);  background: rgba(255,184,0,0.08);  border-color: rgba(255,184,0,0.2); }
+.slide-num.purple { color: var(--purple); background: rgba(180,77,255,0.08); border-color: rgba(180,77,255,0.2); }
+.slide-num.red    { color: var(--red);    background: rgba(255,69,96,0.08);  border-color: rgba(255,69,96,0.2); }
+
+.slide-time {
+  font-family: var(--mono);
+  font-size: 10px; color: var(--muted);
+  letter-spacing: 0.5px;
+}
+
+/* ── SLIDE BODY ── */
+.slide-body {
+  flex: 1; padding: 28px 60px 80px;
+  overflow: hidden;
+  display: flex; flex-direction: column;
+}
+
+/* ═══════════════════════════════════════
+   SLIDE 1 — TÍTULO
+═══════════════════════════════════════ */
+#slide-1 .slide-body {
+  justify-content: center;
+}
+
+.title-main {
+  font-size: 52px; font-weight: 900;
+  line-height: 1.05; letter-spacing: -1px;
+  max-width: 900px;
+  margin-bottom: 20px;
+}
+
+.title-main em { font-style: normal; color: var(--cyan); }
+
+.title-sub {
+  font-size: 16px; color: var(--muted);
+  line-height: 1.6; max-width: 600px;
+  margin-bottom: 36px;
+}
+
+.title-meta {
+  display: flex; gap: 20px; align-items: center;
+  flex-wrap: wrap;
+}
+
+.meta-tag {
+  font-family: var(--mono); font-size: 11px; font-weight: 700;
+  letter-spacing: 0.5px;
+  padding: 5px 12px; border-radius: 3px;
+  border: 1px solid;
+}
+
+.meta-tag.c { color: var(--cyan);   border-color: rgba(0,212,255,0.3);  background: rgba(0,212,255,0.07); }
+.meta-tag.g { color: var(--green);  border-color: rgba(0,229,160,0.3);  background: rgba(0,229,160,0.07); }
+.meta-tag.a { color: var(--amber);  border-color: rgba(255,184,0,0.3);  background: rgba(255,184,0,0.07); }
+
+.title-line {
+  width: 80px; height: 2px;
+  background: linear-gradient(90deg, var(--cyan), transparent);
+  margin-bottom: 24px;
+}
+
+/* ═══════════════════════════════════════
+   SLIDE 2 — CONTEXTO
+═══════════════════════════════════════ */
+.slide-title {
+  font-size: 34px; font-weight: 800; letter-spacing: -0.5px;
+  margin-bottom: 6px;
+}
+
+.slide-subtitle {
+  font-size: 14px; color: var(--muted);
+  margin-bottom: 28px; line-height: 1.5;
+}
+
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; flex: 1; }
+.three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+
+.card-block {
+  padding: 20px; border: 1px solid var(--border);
+  border-radius: 4px; background: var(--panel);
+  position: relative; overflow: hidden;
+}
+
+.card-block::before {
+  content: "";
+  position: absolute; top: 0; left: 0; right: 0; height: 2px;
+}
+
+.card-block.c-cyan::before   { background: linear-gradient(90deg, transparent, var(--cyan), transparent); }
+.card-block.c-green::before  { background: linear-gradient(90deg, transparent, var(--green), transparent); }
+.card-block.c-amber::before  { background: linear-gradient(90deg, transparent, var(--amber), transparent); }
+.card-block.c-purple::before { background: linear-gradient(90deg, transparent, var(--purple), transparent); }
+.card-block.c-red::before    { background: linear-gradient(90deg, transparent, var(--red), transparent); }
+
+.cb-label {
+  font-family: var(--mono); font-size: 10px; font-weight: 700;
+  letter-spacing: 1.5px; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 10px;
+}
+
+.cb-value {
+  font-family: var(--mono); font-size: 28px; font-weight: 700;
+  line-height: 1;
+}
+
+.cb-value.cyan   { color: var(--cyan); }
+.cb-value.green  { color: var(--green); }
+.cb-value.amber  { color: var(--amber); }
+.cb-value.purple { color: var(--purple); }
+
+.cb-desc { font-size: 12px; color: var(--dim); margin-top: 6px; }
+
+.feature-list { display: flex; flex-direction: column; gap: 10px; }
+
+.feature-item {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 10px 14px; background: rgba(0,0,0,0.3);
+  border: 1px solid var(--border); border-radius: 3px;
+}
+
+.fi-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  flex-shrink: 0; margin-top: 5px;
+  box-shadow: 0 0 6px currentColor;
+}
+
+.fi-dot.c { background: var(--cyan);   color: var(--cyan); }
+.fi-dot.g { background: var(--green);  color: var(--green); }
+.fi-dot.a { background: var(--amber);  color: var(--amber); }
+.fi-dot.p { background: var(--purple); color: var(--purple); }
+
+.fi-text { font-size: 13px; color: var(--ink); line-height: 1.4; }
+.fi-sub  { font-size: 11px; color: var(--muted); }
+
+/* ── TABLE STYLED ── */
+.data-table {
+  width: 100%; border-collapse: collapse; font-size: 13px;
+}
+.data-table th {
+  font-family: var(--mono); font-size: 9px; font-weight: 700;
+  letter-spacing: 1.5px; text-transform: uppercase;
+  color: var(--muted); padding: 8px 12px;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+  background: rgba(255,255,255,0.02);
+}
+.data-table td {
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border);
+  font-size: 12px;
+}
+.data-table tr:last-child td { border-bottom: 0; }
+.mono-cell { font-family: var(--mono); font-size: 12px; }
+
+.tag {
+  display: inline-block; font-family: var(--mono); font-size: 9px; font-weight: 700;
+  padding: 2px 7px; border-radius: 2px; letter-spacing: 0.5px;
+}
+.tag.baixo  { background: rgba(255,184,0,0.1);   color: var(--amber);  border: 1px solid rgba(255,184,0,0.25); }
+.tag.medio  { background: rgba(59,142,255,0.1);  color: var(--blue);   border: 1px solid rgba(59,142,255,0.25); }
+.tag.alto   { background: rgba(0,229,160,0.1);   color: var(--green);  border: 1px solid rgba(0,229,160,0.25); }
+
+/* ── DELTA ── */
+.delta {
+  font-family: var(--mono); font-size: 12px; font-weight: 700;
+  padding: 2px 7px; border-radius: 2px;
+}
+.delta.neg { background: rgba(255,69,96,0.1);  color: var(--red);   border: 1px solid rgba(255,69,96,0.25); }
+.delta.pos { background: rgba(0,229,160,0.1);  color: var(--green); border: 1px solid rgba(0,229,160,0.25); }
+.delta.mix { background: rgba(255,184,0,0.1);  color: var(--amber); border: 1px solid rgba(255,184,0,0.25); }
+
+/* ── INSIGHT ── */
+.insight {
+  display: flex; gap: 12px; align-items: flex-start;
+  padding: 14px 16px; margin-top: 16px;
+  background: rgba(0,229,160,0.04);
+  border: 1px solid rgba(0,229,160,0.18);
+  border-radius: 3px; font-size: 13px;
+  color: #7ecfb0; line-height: 1.55;
+}
+.insight.warn {
+  background: rgba(255,184,0,0.04);
+  border-color: rgba(255,184,0,0.18);
+  color: #d4a840;
+}
+.i-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  flex-shrink: 0; margin-top: 5px;
+  background: var(--green); box-shadow: 0 0 6px var(--green);
+}
+.i-dot.warn { background: var(--amber); box-shadow: 0 0 6px var(--amber); }
+
+/* ── BIG STAT ── */
+.big-stats { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 20px; }
+.bstat {
+  padding: 16px 20px; border: 1px solid var(--border); border-radius: 3px;
+  background: var(--panel); text-align: center; flex: 1; min-width: 120px;
+}
+.bstat-val {
+  font-family: var(--mono); font-size: 32px; font-weight: 700;
+  display: block; line-height: 1; margin-bottom: 6px;
+}
+.bstat-lbl {
+  font-size: 10px; font-weight: 600; letter-spacing: 1px;
+  text-transform: uppercase; color: var(--muted); display: block;
+}
+
+/* ── CHART WRAP ── */
+.chart-wrap { position: relative; flex: 1; min-height: 0; }
+
+/* ── CONCLUSION ── */
+.conclusion-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 14px; flex: 1;
+}
+.concl-item {
+  padding: 18px 20px; border: 1px solid var(--border);
+  border-radius: 3px; background: var(--panel);
+  position: relative;
+}
+.concl-num {
+  font-family: var(--mono); font-size: 28px; font-weight: 800;
+  line-height: 1; margin-bottom: 10px;
+}
+.concl-title { font-size: 14px; font-weight: 700; margin-bottom: 6px; }
+.concl-text  { font-size: 12px; color: var(--muted); line-height: 1.55; }
+
+.rq-badge {
+  font-family: var(--mono); font-size: 9px; font-weight: 700;
+  letter-spacing: 1px; padding: 2px 8px; border-radius: 2px;
+  display: inline-block; margin-bottom: 8px;
+}
+.rq-badge.rq1 { background: rgba(0,212,255,0.1);  color: var(--cyan);   border: 1px solid rgba(0,212,255,0.25); }
+.rq-badge.rq2 { background: rgba(180,77,255,0.1); color: var(--purple); border: 1px solid rgba(180,77,255,0.25); }
+
+.full-row { grid-column: 1 / -1; }
+</style>
+</head>
+<body>
+
+<div id="progress-bar"></div>
+
+<div id="slides">
+
+  <!-- ══════════════════════════════════════════
+       SLIDE 1 — TÍTULO
+  ══════════════════════════════════════════ -->
+  <div class="slide active" id="slide-1">
+    <div class="slide-header">
+      <span class="slide-num">01 / 08</span>
+      <span class="slide-time">~20 seg</span>
+    </div>
+    <div class="slide-body">
+      <div class="title-line"></div>
+      <div class="title-main">
+        Impacto da <em>IA</em><br>em Repositórios GitHub
+      </div>
+      <div class="title-sub">
+        Análise empírica de 105 repositórios Python — comparação de métricas
+        de atividade, qualidade e manutenibilidade antes e depois da adoção de ferramentas de IA.
+      </div>
+      <div class="title-meta">
+        <span class="meta-tag c">105 REPOSITÓRIOS</span>
+        <span class="meta-tag g">RQ1 + RQ2</span>
+        <span class="meta-tag a">ANÁLISE PRÉ/PÓS IA</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       SLIDE 2 — CONTEXTO E MOTIVAÇÃO
+  ══════════════════════════════════════════ -->
+  <div class="slide" id="slide-2">
+    <div class="slide-header">
+      <span class="slide-num">02 / 08</span>
+      <span class="slide-time">~50 seg</span>
+    </div>
+    <div class="slide-body">
+      <div class="slide-title">Contexto e Motivação</div>
+      <div class="slide-subtitle">Por que analisar o impacto de ferramentas de IA em repositórios?</div>
+
+      <div class="two-col" style="align-items:start;gap:24px;flex:1">
+        <div class="feature-list">
+          <div class="feature-item">
+            <div class="fi-dot c"></div>
+            <div>
+              <div class="fi-text">Ferramentas como Copilot, Claude e ChatGPT estão integradas ao fluxo de desenvolvimento</div>
+            </div>
+          </div>
+          <div class="feature-item">
+            <div class="fi-dot g"></div>
+            <div>
+              <div class="fi-text">Repositórios públicos registram sinais de uso: <span style="font-family:var(--mono);font-size:12px;color:var(--cyan)">Co-Authored-By</span>, menções, arquivos de config</div>
+            </div>
+          </div>
+          <div class="feature-item">
+            <div class="fi-dot a"></div>
+            <div>
+              <div class="fi-text">Falta análise empírica de <strong>antes vs. depois</strong> da adoção de IA em larga escala</div>
+            </div>
+          </div>
+          <div class="feature-item">
+            <div class="fi-dot p"></div>
+            <div>
+              <div class="fi-text">Questão central: a IA melhora ou piora a manutenibilidade dos projetos?</div>
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:14px">
+          <div class="card-block c-cyan" style="padding:18px 20px">
+            <div class="cb-label">RQ1 — Atividade</div>
+            <div style="font-size:13px;color:var(--ink);line-height:1.6">
+              Como <strong>commits, issues, taxa mensal</strong> e <strong>tempo de resolução</strong> mudam após os sinais de IA?
+            </div>
+          </div>
+          <div class="card-block c-purple" style="padding:18px 20px">
+            <div class="cb-label">RQ2 — Qualidade</div>
+            <div style="font-size:13px;color:var(--ink);line-height:1.6">
+              Como <strong>fixes, reverts, linhas/commit</strong> e <strong>Maintainability Index</strong> se comportam?
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       SLIDE 3 — METODOLOGIA
+  ══════════════════════════════════════════ -->
+  <div class="slide" id="slide-3">
+    <div class="slide-header">
+      <span class="slide-num amber">03 / 08</span>
+      <span class="slide-time">~55 seg</span>
+    </div>
+    <div class="slide-body">
+      <div class="slide-title">Metodologia</div>
+      <div class="slide-subtitle">Como coletamos e analisamos os dados</div>
+
+      <div class="two-col" style="flex:1;align-items:start">
+        <div style="display:flex;flex-direction:column;gap:12px">
+          <div class="card-block c-amber">
+            <div class="cb-label">01 // Seleção</div>
+            <div style="font-size:12px;color:var(--ink);line-height:1.6;margin-top:4px">
+              105 repositórios <strong>Python</strong> públicos do GitHub com <strong>≥1.000 estrelas</strong> e pelo menos um sinal detectado de uso de IA.
+            </div>
+          </div>
+          <div class="card-block c-cyan">
+            <div class="cb-label">02 // Sinais de IA detectados</div>
+            <div style="display:flex;flex-direction:column;gap:5px;margin-top:6px">
+              <div style="font-size:11px;color:var(--muted);display:flex;gap:8px;align-items:center"><span style="color:var(--cyan);font-family:var(--mono)">→</span> Co-autoria em commits (IA como co-autor)</div>
+              <div style="font-size:11px;color:var(--muted);display:flex;gap:8px;align-items:center"><span style="color:var(--cyan);font-family:var(--mono)">→</span> Menção ao Claude / Anthropic</div>
+              <div style="font-size:11px;color:var(--muted);display:flex;gap:8px;align-items:center"><span style="color:var(--cyan);font-family:var(--mono)">→</span> Menção ao GitHub Copilot</div>
+              <div style="font-size:11px;color:var(--muted);display:flex;gap:8px;align-items:center"><span style="color:var(--cyan);font-family:var(--mono)">→</span> Arquivo de configuração de IA</div>
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:12px">
+          <div class="card-block c-green">
+            <div class="cb-label">03 // Marco temporal</div>
+            <div style="font-size:12px;color:var(--ink);line-height:1.6;margin-top:4px">
+              Para cada repo, identificamos o <strong>primeiro sinal</strong> de IA e dividimos o histórico em período <strong>antes</strong> e <strong>depois</strong>.
+            </div>
+          </div>
+          <div class="card-block c-purple">
+            <div class="cb-label">04 // Análise estatística</div>
+            <div style="font-size:12px;color:var(--ink);line-height:1.6;margin-top:4px">
+              Usamos <strong>mediana</strong> como medida principal para reduzir o efeito de outliers. Comparação observacional, sem grupo de controle.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       SLIDE 4 — DATASET
+  ══════════════════════════════════════════ -->
+  <div class="slide" id="slide-4">
+    <div class="slide-header">
+      <span class="slide-num">04 / 08</span>
+      <span class="slide-time">~55 seg</span>
+    </div>
+    <div class="slide-body">
+      <div class="slide-title">Caracterização do Dataset</div>
+      <div class="slide-subtitle">105 repositórios Python — distribuição por nível de adoção de IA</div>
+
+      <div class="big-stats">
+        <div class="bstat">
+          <span class="bstat-val" style="color:var(--cyan)" id="p-repos">0</span>
+          <span class="bstat-lbl">Repositórios</span>
+        </div>
+        <div class="bstat">
+          <span class="bstat-val" style="color:var(--amber)" id="p-stars">0k</span>
+          <span class="bstat-lbl">Med. Estrelas</span>
+        </div>
+        <div class="bstat">
+          <span class="bstat-val" style="color:var(--purple)" id="p-age">0a</span>
+          <span class="bstat-lbl">Med. Idade</span>
+        </div>
+        <div class="bstat">
+          <span class="bstat-val" style="color:var(--green)" id="p-ai">0</span>
+          <span class="bstat-lbl">Med. Score IA</span>
+        </div>
+      </div>
+
+      <div class="two-col" style="flex:1;min-height:0">
+        <div style="display:flex;flex-direction:column">
+          <div style="font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:1px;color:var(--muted);margin-bottom:10px">// GRUPOS DE ADOÇÃO DE IA</div>
+          <div class="chart-wrap">
+            <canvas id="chartDataset"></canvas>
+          </div>
+        </div>
+        <div>
+          <div style="font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:1px;color:var(--muted);margin-bottom:10px">// TOP REPOSITÓRIOS</div>
+          <table class="data-table">
+            <thead>
+              <tr><th>Repositório</th><th>Estrelas</th><th>Score</th><th>Grupo</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>huggingface/transformers</td><td class="mono-cell">160k</td><td class="mono-cell">8</td><td><span class="tag alto">ALTO</span></td></tr>
+              <tr><td>pytorch/pytorch</td><td class="mono-cell">99k</td><td class="mono-cell">9</td><td><span class="tag alto">ALTO</span></td></tr>
+              <tr><td>home-assistant/core</td><td class="mono-cell">87k</td><td class="mono-cell">12</td><td><span class="tag alto">ALTO</span></td></tr>
+              <tr><td>TheAlgorithms/Python</td><td class="mono-cell">220k</td><td class="mono-cell">5</td><td><span class="tag medio">MÉDIO</span></td></tr>
+              <tr><td>django/django</td><td class="mono-cell">87k</td><td class="mono-cell">2</td><td><span class="tag baixo">BAIXO</span></td></tr>
+              <tr><td>python/cpython</td><td class="mono-cell">72k</td><td class="mono-cell">3</td><td><span class="tag baixo">BAIXO</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       SLIDE 5 — RQ1 PERGUNTA
+  ══════════════════════════════════════════ -->
+  <div class="slide" id="slide-5">
+    <div class="slide-header">
+      <span class="slide-num green">05 / 08</span>
+      <span class="slide-time">~1 min 30 seg</span>
+    </div>
+    <div class="slide-body">
+      <div class="slide-title">RQ1 — Atividade de Manutenção</div>
+      <div class="slide-subtitle" style="font-size:13px;color:var(--cyan);font-weight:600;font-family:var(--mono)">
+        "Como commits, issues, taxa mensal e tempo de resolução mudam após os sinais de IA?"
+      </div>
+
+      <div class="two-col" style="flex:1;min-height:0">
+        <div style="display:flex;flex-direction:column">
+          <div style="font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:1px;color:var(--muted);margin-bottom:10px">// MEDIANAS ANTES vs. DEPOIS</div>
+          <div class="chart-wrap">
+            <canvas id="chartRQ1"></canvas>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <div style="font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:1px;color:var(--muted);margin-bottom:2px">// VARIAÇÕES PERCENTUAIS</div>
+
+          <div class="card-block c-red" style="padding:14px 16px">
+            <div class="cb-label">Commits</div>
+            <div style="display:flex;align-items:center;gap:10px;margin-top:6px">
+              <span style="font-family:var(--mono);font-size:24px;font-weight:800;color:var(--red)">-34.9%</span>
+              <span style="font-size:11px;color:var(--muted)">255 → 166 (mediana)</span>
+            </div>
+          </div>
+
+          <div class="card-block c-red" style="padding:14px 16px">
+            <div class="cb-label">Issues</div>
+            <div style="display:flex;align-items:center;gap:10px;margin-top:6px">
+              <span style="font-family:var(--mono);font-size:24px;font-weight:800;color:var(--red)">-71.7%</span>
+              <span style="font-size:11px;color:var(--muted)">399 → 113 (mediana)</span>
+            </div>
+          </div>
+
+          <div class="card-block c-red" style="padding:14px 16px">
+            <div class="cb-label">Tempo de Resolução</div>
+            <div style="display:flex;align-items:center;gap:10px;margin-top:6px">
+              <span style="font-family:var(--mono);font-size:24px;font-weight:800;color:var(--red)">-42.9%</span>
+              <span style="font-size:11px;color:var(--muted)">9.898h → 5.645h (mediana)</span>
+            </div>
+          </div>
+
+          <div class="insight">
+            <div class="i-dot"></div>
+            Redução consistente em todas as métricas de atividade. Pode indicar maior eficiência — ou simplesmente janela temporal menor no período pós-sinal.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       SLIDE 6 — RQ2
+  ══════════════════════════════════════════ -->
+  <div class="slide" id="slide-6">
+    <div class="slide-header">
+      <span class="slide-num purple">06 / 08</span>
+      <span class="slide-time">~1 min 30 seg</span>
+    </div>
+    <div class="slide-body">
+      <div class="slide-title">RQ2 — Qualidade e Manutenibilidade</div>
+      <div class="slide-subtitle" style="font-size:13px;color:var(--purple);font-weight:600;font-family:var(--mono)">
+        "Como fixes, reverts, linhas/commit e Maintainability Index se comportam?"
+      </div>
+
+      <div class="two-col" style="flex:1;min-height:0">
+        <div style="display:flex;flex-direction:column">
+          <div style="font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:1px;color:var(--muted);margin-bottom:10px">// COMPARAÇÃO ANTES vs. DEPOIS</div>
+          <div class="chart-wrap">
+            <canvas id="chartRQ2"></canvas>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <div style="font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:1px;color:var(--muted);margin-bottom:2px">// RESULTADO MISTO</div>
+
+          <table class="data-table" style="background:var(--panel);border:1px solid var(--border);border-radius:3px">
+            <thead>
+              <tr><th>Métrica</th><th>Antes</th><th>Depois</th><th>Δ</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>% Fixes</td><td class="mono-cell">32.12%</td><td class="mono-cell">36.07%</td><td><span class="delta pos">+3.95</span></td></tr>
+              <tr><td>% Reverts</td><td class="mono-cell">1.10%</td><td class="mono-cell">1.24%</td><td><span class="delta neg">+0.14</span></td></tr>
+              <tr><td>Linhas/commit</td><td class="mono-cell">193.79</td><td class="mono-cell">217.49</td><td><span class="delta pos">+23.69</span></td></tr>
+              <tr><td>MI médio</td><td class="mono-cell">63.43</td><td class="mono-cell">60.90</td><td><span class="delta neg">-2.53</span></td></tr>
+              <tr><td>MI mediano</td><td class="mono-cell">60.29</td><td class="mono-cell">58.50</td><td><span class="delta neg">-1.80</span></td></tr>
+            </tbody>
+          </table>
+
+          <div class="insight">
+            <div class="i-dot"></div>
+            % Fixes sobe (+12.3%) — commits mais focados em correção. Linhas/commit crescem — commits maiores.
+          </div>
+          <div class="insight warn">
+            <div class="i-dot warn"></div>
+            MI cai levemente (-2.98%) — sem evidência de melhora uniforme de manutenibilidade.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       SLIDE 7 — POR GRUPO
+  ══════════════════════════════════════════ -->
+  <div class="slide" id="slide-7">
+    <div class="slide-header">
+      <span class="slide-num amber">07 / 08</span>
+      <span class="slide-time">~35 seg</span>
+    </div>
+    <div class="slide-body">
+      <div class="slide-title">Análise por Grupo de Adoção</div>
+      <div class="slide-subtitle">Repositórios com mais sinais de IA tendem a ser mais populares</div>
+
+      <div class="three-col" style="margin-bottom:16px">
+        <div class="card-block c-amber" style="text-align:center;padding:14px">
+          <div class="cb-label">BAIXO (2-3)</div>
+          <div class="cb-value amber" style="font-size:20px">14.662</div>
+          <div class="cb-desc">mediana estrelas</div>
+          <div style="margin-top:8px;font-family:var(--mono);font-size:11px;color:var(--muted)">55 repos</div>
+        </div>
+        <div class="card-block c-cyan" style="text-align:center;padding:14px">
+          <div class="cb-label">MÉDIO (4-6)</div>
+          <div class="cb-value cyan" style="font-size:20px">18.905</div>
+          <div class="cb-desc">mediana estrelas</div>
+          <div style="margin-top:8px;font-family:var(--mono);font-size:11px;color:var(--muted)">32 repos</div>
+        </div>
+        <div class="card-block c-green" style="text-align:center;padding:14px">
+          <div class="cb-label">ALTO (7+)</div>
+          <div class="cb-value green" style="font-size:20px">30.102</div>
+          <div class="cb-desc">mediana estrelas</div>
+          <div style="margin-top:8px;font-family:var(--mono);font-size:11px;color:var(--muted)">18 repos</div>
+        </div>
+      </div>
+
+      <div class="chart-wrap" style="flex:1;min-height:0">
+        <canvas id="chartGrupos"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       SLIDE 8 — CONCLUSÃO
+  ══════════════════════════════════════════ -->
+  <div class="slide" id="slide-8">
+    <div class="slide-header">
+      <span class="slide-num red">08 / 08</span>
+      <span class="slide-time">~55 seg</span>
+    </div>
+    <div class="slide-body">
+      <div class="slide-title">Conclusão e Limitações</div>
+      <div class="slide-subtitle">O que os dados sugerem — e o que não podemos afirmar</div>
+
+      <div class="conclusion-grid" style="flex:1">
+        <div class="concl-item">
+          <div class="rq-badge rq1">RQ1</div>
+          <div class="concl-num" style="color:var(--cyan)">✓</div>
+          <div class="concl-title">Atividade reduz consistentemente</div>
+          <div class="concl-text">Commits -34.9%, issues -71.7%, tempo de resolução -42.9%. Redução pode indicar eficiência da IA ou simplesmente maturidade do projeto.</div>
+        </div>
+
+        <div class="concl-item">
+          <div class="rq-badge rq2">RQ2</div>
+          <div class="concl-num" style="color:var(--amber)">~</div>
+          <div class="concl-title">Qualidade: resultado misto</div>
+          <div class="concl-text">% Fixes sobe (+12.3%), commits ficam maiores (+12.2%). Maintainability Index cai levemente (-2.98%). Sem melhora uniforme de manutenibilidade.</div>
+        </div>
+
+        <div class="concl-item">
+          <div style="font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:1px;color:var(--muted);margin-bottom:8px">ACHADO EXTRA</div>
+          <div class="concl-num" style="color:var(--green);font-size:20px">2× estrelas</div>
+          <div class="concl-title">Alta adoção correlaciona com popularidade</div>
+          <div class="concl-text">Grupo Alto tem mediana de 30k estrelas vs. 14k no grupo Baixo. Projetos mais populares adotam IA com mais intensidade.</div>
+        </div>
+
+        <div class="concl-item" style="background:rgba(255,184,0,0.04);border-color:rgba(255,184,0,0.2)">
+          <div style="font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:1px;color:var(--amber);margin-bottom:8px">⚠ LIMITAÇÕES</div>
+          <div class="concl-num" style="color:var(--amber);font-size:16px">Observacional</div>
+          <div class="concl-title">Sem causalidade direta</div>
+          <div class="concl-text">Estudo sem grupo de controle. Variáveis de confusão não controladas: maturidade do projeto, tamanho da equipe, políticas de manutenção.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- #slides -->
+
+<!-- ── CONTROLS ── -->
+<div id="controls">
+  <button class="ctrl-btn" id="btn-prev" title="Anterior (←)">&#8592;</button>
+  <span id="slide-counter">01 / 08</span>
+  <button class="ctrl-btn" id="btn-next" title="Próximo (→)">&#8594;</button>
+  <span style="width:1px;height:16px;background:var(--border);flex-shrink:0"></span>
+  <span id="timer-display">00:00</span>
+</div>
+
+<script>
+// ── SLIDES ──
+const TOTAL = 8;
+let current = 1;
+
+function goTo(n) {
+  if (n < 1 || n > TOTAL) return;
+  const prev = document.getElementById('slide-' + current);
+  const next = document.getElementById('slide-' + n);
+  prev.classList.add('exit');
+  setTimeout(() => { prev.classList.remove('active', 'exit'); }, 400);
+  next.classList.add('active');
+  current = n;
+  document.getElementById('slide-counter').textContent =
+    String(n).padStart(2,'0') + ' / ' + String(TOTAL).padStart(2,'0');
+  document.getElementById('progress-bar').style.width = (n / TOTAL * 100) + '%';
+  // trigger charts on demand
+  if (n === 4 && !chartsRendered.dataset) renderDatasetChart();
+  if (n === 5 && !chartsRendered.rq1)     renderRQ1Chart();
+  if (n === 6 && !chartsRendered.rq2)     renderRQ2Chart();
+  if (n === 7 && !chartsRendered.grupos)  renderGruposChart();
+}
+
+document.getElementById('btn-prev').addEventListener('click', () => goTo(current - 1));
+document.getElementById('btn-next').addEventListener('click', () => goTo(current + 1));
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight' || e.key === ' ') goTo(current + 1);
+  if (e.key === 'ArrowLeft')                   goTo(current - 1);
+});
+
+// initial progress
+document.getElementById('progress-bar').style.width = (1 / TOTAL * 100) + '%';
+
+// ── TIMER ──
+let seconds = 0;
+setInterval(() => {
+  seconds++;
+  const m = String(Math.floor(seconds / 60)).padStart(2,'0');
+  const s = String(seconds % 60).padStart(2,'0');
+  document.getElementById('timer-display').textContent = m + ':' + s;
+  if (seconds > 420) { // > 7 min
+    document.getElementById('timer-display').style.color = 'var(--red)';
+  }
+}, 1000);
+
+// ── COUNTERS on slide 4 ──
+function counter(el, to, dur, fmt) {
+  const start = performance.now();
+  const tick = now => {
+    const p = Math.min((now - start) / dur, 1);
+    const e = 1 - Math.pow(1 - p, 3);
+    el.textContent = fmt(e * to);
+    if (p < 1) requestAnimationFrame(tick);
+  };
+  requestAnimationFrame(tick);
+}
+
+// Trigger counters when slide 4 becomes active
+const slide4observer = new MutationObserver(muts => {
+  muts.forEach(m => {
+    if (m.target.classList.contains('active') && !slide4observer._done) {
+      slide4observer._done = true;
+      counter(document.getElementById('p-repos'), 105, 900, v => Math.round(v));
+      counter(document.getElementById('p-stars'), 17.2, 1100, v => v.toFixed(1)+'k');
+      counter(document.getElementById('p-age'),   9.3,  900, v => v.toFixed(1)+'a');
+      counter(document.getElementById('p-ai'),    3,    700, v => Math.round(v));
+    }
+  });
+});
+slide4observer.observe(document.getElementById('slide-4'), { attributes: true, attributeFilter: ['class'] });
+
+// ── CHART DEFAULTS ──
+Chart.defaults.color = '#4e6480';
+Chart.defaults.borderColor = '#1c2840';
+Chart.defaults.font.family = "'JetBrains Mono', monospace";
+Chart.defaults.font.size = 10;
+
+const tooltipCfg = {
+  backgroundColor: '#0f1520', borderColor: '#1c2840', borderWidth: 1,
+  titleColor: '#dce8f5', bodyColor: '#4e6480', padding: 10, cornerRadius: 3,
+};
+
+const chartsRendered = { dataset: false, rq1: false, rq2: false, grupos: false };
+
+function renderDatasetChart() {
+  chartsRendered.dataset = true;
+  new Chart(document.getElementById('chartDataset'), {
+    type: 'doughnut',
+    data: {
+      labels: ['Baixo (2-3)', 'Médio (4-6)', 'Alto (7+)'],
+      datasets: [{
+        data: [55, 32, 18],
+        backgroundColor: ['rgba(255,184,0,0.8)', 'rgba(59,142,255,0.8)', 'rgba(0,229,160,0.8)'],
+        borderColor: '#09131e', borderWidth: 3, hoverOffset: 6
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      animation: { animateRotate: true, animateScale: true, duration: 900, easing: 'easeOutBack' },
+      cutout: '58%',
+      plugins: {
+        legend: { position: 'right', labels: { boxWidth: 10, padding: 12, font: { size: 10, weight: '700' }, color: '#dce8f5' } },
+        tooltip: { ...tooltipCfg, callbacks: { label: ctx => ` ${ctx.label}: ${ctx.raw} (${(ctx.raw/105*100).toFixed(1)}%)` } }
+      }
+    }
+  });
+}
+
+function renderRQ1Chart() {
+  chartsRendered.rq1 = true;
+  new Chart(document.getElementById('chartRQ1'), {
+    type: 'bar',
+    data: {
+      labels: ['Commits', 'Issues', 'Taxa/mês', 'Tempo (h÷10)'],
+      datasets: [
+        { label: 'Antes', data: [255, 399, 66.5, 989.8], backgroundColor: 'rgba(0,212,255,0.7)', borderColor: '#00d4ff', borderWidth: 1, borderRadius: 3, borderSkipped: false },
+        { label: 'Depois', data: [166, 113, 18.83, 564.5], backgroundColor: 'rgba(0,229,160,0.7)', borderColor: '#00e5a0', borderWidth: 1, borderRadius: 3, borderSkipped: false }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      animation: { duration: 900, easing: 'easeOutQuart' },
+      plugins: {
+        legend: { display: true, position: 'top', labels: { boxWidth: 10, padding: 12, font: { size: 10, weight: '700' }, color: '#dce8f5' } },
+        tooltip: tooltipCfg
+      },
+      scales: {
+        x: { grid: { display: false }, ticks: { color: '#dce8f5', font: { size: 10 } } },
+        y: { grid: { color: '#1c2840' }, ticks: { color: '#4e6480', font: { size: 10 } } }
+      }
+    }
+  });
+}
+
+function renderRQ2Chart() {
+  chartsRendered.rq2 = true;
+  new Chart(document.getElementById('chartRQ2'), {
+    type: 'radar',
+    data: {
+      labels: ['% Fixes', '% Reverts (×10)', 'Linhas/commit (÷4)', 'MI médio', 'MI mediano'],
+      datasets: [
+        { label: 'Antes', data: [32.12, 11.0, 48.4, 63.43, 60.29], backgroundColor: 'rgba(0,212,255,0.08)', borderColor: '#00d4ff', borderWidth: 2, pointBackgroundColor: '#00d4ff', pointRadius: 3 },
+        { label: 'Depois', data: [36.07, 12.4, 54.4, 60.90, 58.50], backgroundColor: 'rgba(0,229,160,0.08)', borderColor: '#00e5a0', borderWidth: 2, pointBackgroundColor: '#00e5a0', pointRadius: 3 }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      animation: { duration: 900 },
+      plugins: {
+        legend: { display: true, position: 'top', labels: { boxWidth: 10, padding: 12, font: { size: 10, weight: '700' }, color: '#dce8f5' } },
+        tooltip: tooltipCfg
+      },
+      scales: {
+        r: {
+          grid: { color: '#1c2840' }, angleLines: { color: '#1c2840' },
+          pointLabels: { font: { size: 10, weight: '600' }, color: '#4e6480' },
+          ticks: { display: false, backdropColor: 'transparent' }
+        }
+      }
+    }
+  });
+}
+
+function renderGruposChart() {
+  chartsRendered.grupos = true;
+  new Chart(document.getElementById('chartGrupos'), {
+    type: 'bar',
+    data: {
+      labels: ['Baixo (2-3)', 'Médio (4-6)', 'Alto (7+)'],
+      datasets: [
+        { label: 'Delta Commits (mediana)', data: [-7, -24, 0], backgroundColor: 'rgba(0,212,255,0.75)', borderRadius: 3, borderSkipped: false },
+        { label: 'Delta Issues (mediana)',  data: [-249, -237, -119.5], backgroundColor: 'rgba(255,69,96,0.75)', borderRadius: 3, borderSkipped: false },
+        { label: 'Delta Linhas/commit',     data: [24.82, 26.92, 56.14], backgroundColor: 'rgba(0,229,160,0.75)', borderRadius: 3, borderSkipped: false }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      animation: { duration: 900, easing: 'easeOutQuart' },
+      plugins: {
+        legend: { display: true, position: 'top', labels: { boxWidth: 10, padding: 14, font: { size: 10, weight: '700' }, color: '#dce8f5' } },
+        tooltip: tooltipCfg
+      },
+      scales: {
+        x: { grid: { display: false }, ticks: { color: '#dce8f5', font: { size: 10 } } },
+        y: { grid: { color: '#1c2840' }, ticks: { color: '#4e6480', font: { size: 10 } } }
+      }
+    }
+  });
+}
+</script>
+</body>
+</html>

@@ -1,4 +1,4 @@
-﻿"ai_score_group","repositories","median_stars","average_stars","median_age_years","average_age_years","median_ai_score","detected_file_count","coauthorship_count","copilot_count","claude_count"
-"Alto (7+)","18","32451","43372.39","9.4","10.11","9","18","18","11","18"
-"Baixo (2-3)","55","15371","23382.15","9.6","10.45","3","8","47","24","27"
-"Medio (4-6)","32","21313","30717.59","9","9.9","6","16","29","21","24"
+ai_score_group,repositories,median_stars,average_stars,median_age_years,average_age_years,median_ai_score,detected_file_count,coauthorship_count,copilot_count,claude_count,median_delta_commits,median_delta_issues,median_delta_issue_rate,median_delta_resolution_hours,median_delta_fix_percent,median_delta_revert_percent,median_delta_lines_changed,median_delta_avg_mi
+Baixo (2-3),55,14662,23382.15,9.5,10.45,3.0,8,47,24,27,-7.0,-249.0,-41.5,-2600.25,2.01,0.0,24.82,-1.82
+Medio (4-6),32,18905.0,30717.59,9.0,9.9,6.0,16,29,21,24,-24.0,-237.0,-39.5,-55.45,9.96,-0.06,26.92,-0.37
+Alto (7+),18,30102.0,43372.39,9.05,10.11,8.5,18,18,11,18,0.0,-119.5,-19.92,-3056.83,7.69,0.86,56.14,-2.91

@@ -1,0 +1,10 @@
+metric,unit,pre_median,pos_median,delta_median,pre_average,pos_average,delta_average
+Commits,commits,255.0,166.0,-89.0,401.3,364.5,-36.81
+Issues,issues,399.0,113.0,-286.0,1405.86,452.32,-953.53
+Taxa de issues por mes,issues/mes,66.5,18.83,-47.67,234.31,75.39,-158.92
+Tempo medio de resolucao,horas,9898.01,5645.14,-4252.87,12337.59,9290.2,-3047.39
+Percentual de fixes,%,32.12,36.07,3.95,33.45,38.76,5.31
+Percentual de reverts,%,1.1,1.24,0.14,1.86,1.96,0.1
+Linhas alteradas por commit,linhas,193.79,217.49,23.69,573.01,591.69,18.68
+Maintainability Index medio,MI,63.43,60.9,-2.53,63.82,62.47,-1.36
+Maintainability Index mediano,MI,60.29,58.5,-1.8,63.63,61.74,-1.9

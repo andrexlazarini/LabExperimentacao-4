@@ -808,7 +808,7 @@ def write_dashboard(rows, by_group, by_score, pre_pos, evidence, top10):
 :root {{
   --bg: #eef3f8;
   --ink: #13202f;
-  --muted: #66768a;
+  --muted: #ffffff;
   --panel: #ffffff;
   --line: #d7e0ea;
   --blue: #2f6fed;

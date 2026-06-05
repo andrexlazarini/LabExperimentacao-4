@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 repository,stars,age_years,ai_score,ai_score_group
 TheAlgorithms/Python,220710,9.8,5.0,Medio (4-6)
 huggingface/transformers,160227,7.5,8.0,Alto (7+)
@@ -9,3 +10,16 @@ python/cpython,72575,9.2,3.0,Baixo (2-3)
 ansible/ansible,68467,14.2,5.0,Medio (4-6)
 scikit-learn/scikit-learn,65968,15.7,3.0,Baixo (2-3)
 scrapy/scrapy,61542,16.2,3.0,Baixo (2-3)
+=======
+﻿"repository","stars","age_years","ai_score","ai_score_group"
+"TheAlgorithms/Python","220710","9.8","5","Medio (4-6)"
+"huggingface/transformers","160227","7.5","8","Alto (7+)"
+"pytorch/pytorch","99610","9.7","9","Alto (7+)"
+"django/django","87397","14","2","Baixo (2-3)"
+"home-assistant/core","86919","12.6","12","Alto (7+)"
+"sherlock-project/sherlock","82887","7.4","3","Baixo (2-3)"
+"python/cpython","72575","9.2","3","Baixo (2-3)"
+"ansible/ansible","68467","14.2","5","Medio (4-6)"
+"scikit-learn/scikit-learn","65968","15.7","3","Baixo (2-3)"
+"scrapy/scrapy","61542","16.2","3","Baixo (2-3)"
+>>>>>>> 022c0bf9546ddf39c53ef83c52bf9bdb180571f2

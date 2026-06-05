@@ -1,5 +1,13 @@
+<<<<<<< HEAD
 stars_group,repositories
 "15 mil a 29,9 mil",33
 "30 mil a 59,9 mil",18
 60 mil ou mais,11
 Menos de 15 mil,43
+=======
+﻿"stars_group","repositories"
+"15 mil a 29,9 mil","33"
+"30 mil a 59,9 mil","18"
+"60 mil ou mais","11"
+"Menos de 15 mil","43"
+>>>>>>> 022c0bf9546ddf39c53ef83c52bf9bdb180571f2

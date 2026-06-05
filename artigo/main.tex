@@ -1,0 +1,503 @@
+% ============================================================
+%  Impacto da IA em Repositórios GitHub — Lab04
+%  Compilar no Overleaf com pdfLaTeX
+% ============================================================
+\documentclass[12pt,a4paper,twocolumn]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[brazil]{babel}
+\usepackage{geometry}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{pgfplots}
+\usepackage{tikz}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{caption}
+\usepackage{amsmath}
+\usepackage{microtype}
+\usepackage{enumitem}
+\usepackage{float}
+\usepackage{parskip}
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+\usepackage{authblk}
+\usepackage{mdframed}
+
+\raggedbottom
+
+\pgfplotsset{compat=1.18}
+
+\geometry{a4paper, top=2.4cm, bottom=2.4cm, left=1.8cm, right=1.8cm, columnsep=0.7cm}
+
+% ── Cores ──────────────────────────────────────────────────
+\definecolor{primblue}{RGB}{30,100,200}
+\definecolor{acyan}{RGB}{0,180,210}
+\definecolor{agreen}{RGB}{0,170,120}
+\definecolor{ared}{RGB}{210,55,70}
+\definecolor{aamber}{RGB}{200,140,10}
+\definecolor{darkgray}{RGB}{80,100,120}
+\definecolor{lightpanel}{RGB}{248,250,253}
+\definecolor{borderpanel}{RGB}{210,220,235}
+
+\hypersetup{colorlinks=true,linkcolor=primblue,citecolor=primblue,urlcolor=acyan}
+
+% ── Seções ─────────────────────────────────────────────────
+\titleformat{\section}{\large\bfseries\color{primblue}}{\thesection.}{0.5em}{}[\vspace{-4pt}\rule{\columnwidth}{0.4pt}]
+\titleformat{\subsection}{\normalsize\bfseries}{\thesubsection.}{0.5em}{}
+\titlespacing{\section}{0pt}{10pt}{4pt}
+\titlespacing{\subsection}{0pt}{6pt}{2pt}
+
+% ── Cabeçalho ──────────────────────────────────────────────
+\pagestyle{fancy}\fancyhf{}
+\fancyhead[L]{\small\color{darkgray}\textit{Lab04 — Impacto da IA em Repositórios GitHub}}
+\fancyhead[R]{\small\color{darkgray}2025}
+\fancyfoot[C]{\small\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\headrule}{\hbox to\headwidth{\color{acyan}\leaders\hrule height\headrulewidth\hfill}}
+
+% ── Box de hipóteses ───────────────────────────────────────
+\newmdenv[backgroundcolor=lightpanel,linecolor=borderpanel,linewidth=0.5pt,
+          innerleftmargin=6pt,innerrightmargin=6pt,
+          innertopmargin=5pt,innerbottommargin=5pt,
+          skipabove=4pt,skipbelow=4pt, nobreak=true]{hypbox}
+
+% ── Pgfplots ───────────────────────────────────────────────
+\pgfplotsset{
+  pairbar/.style={
+    width=0.95\columnwidth, height=5.2cm,
+    ybar, bar width=14pt, enlarge x limits=0.35,
+    symbolic x coords={Mediana, Media}, xtick=data,
+    ymin=0, grid=major, grid style={dotted,gray!40},
+    legend style={font=\tiny,at={(0.5,1.02)},anchor=south,legend columns=-1,draw=none,fill=none},
+    tick label style={font=\tiny}, label style={font=\tiny},
+    title style={font=\small\bfseries,at={(0.5,1.15)},anchor=south},
+    cycle list={{fill=acyan!70,draw=none},{fill=agreen!70,draw=none}},
+  }
+}
+
+\begin{document}
+
+% ── Título (onecolumn) ─────────────────────────────────────
+\twocolumn[{%
+\begin{@twocolumnfalse}
+\vspace*{0.2cm}
+{\centering
+  {\LARGE\bfseries Impacto de Ferramentas de Inteligência Artificial\\[4pt]
+   em Repositórios GitHub: Uma Análise Empírica\par}
+  \vspace{0.5em}
+  {\large Andre Lazarini e João Pedro Guimarães\par}
+  \vspace{0.15em}
+  {\small Laboratório de Experimentação em Engenharia de Software\par}
+\par}
+
+\vspace{0.5em}\noindent\rule{\linewidth}{0.5pt}
+
+\begin{center}\textbf{Resumo}\end{center}
+\small
+Este trabalho apresenta uma análise empírica de 105 repositórios Python públicos do
+GitHub classificados por nível de evidência de uso de IA. Para cada repositório,
+comparamos métricas de \textit{issues}, retrabalho corretivo e verbosidade de
+\textit{commits} nos períodos anterior e posterior ao primeiro sinal de adoção de IA.
+Os resultados indicam: \textbf{(RQ1)} redução na taxa de \textit{issues} e no tempo
+de resolução — contrário à hipótese alternativa; \textbf{(RQ2)} aumento modesto em
+\textit{fixes} e \textit{reverts} — em linha com a hipótese alternativa;
+\textbf{(RQ3)} \textit{commits} maiores pós-IA, mas sem melhora no Maintainability
+Index — suporte parcial.
+
+\noindent\rule{\linewidth}{0.5pt}\vspace{0.5em}
+\end{@twocolumnfalse}
+}]
+
+% ═══════════════════════════════════════════════════════════
+\section{Introdução}
+% ═══════════════════════════════════════════════════════════
+
+Ferramentas de IA generativa — GitHub Copilot, Claude, ChatGPT — integraram-se
+ao fluxo de desenvolvimento de inúmeros projetos de código aberto. Estudos prévios
+investigaram a qualidade do código gerado por IA~\cite{dakhel2023copilot} e a
+produtividade de desenvolvedores~\cite{ziegler2022copilot}, mas há lacuna em
+análises empíricas de larga escala que comparem métricas \textit{antes} e
+\textit{depois} da introdução de sinais de IA nos repositórios.
+
+Este trabalho aborda três questões de pesquisa:
+
+\begin{itemize}[leftmargin=1.2em,itemsep=2pt,topsep=2pt]
+  \item \textbf{RQ1:} O uso de IA impacta a taxa de abertura de \textit{issues}
+    e o tempo médio de resolução em projetos de software?
+  \item \textbf{RQ2:} \textit{Commits} assistidos por IA exigem mais retrabalho
+    corretivo?
+  \item \textbf{RQ3:} \textit{Commits} assistidos por IA são mais verbosos
+    (maiores)?
+\end{itemize}
+
+% ═══════════════════════════════════════════════════════════
+\section{Trabalhos Relacionados}
+% ═══════════════════════════════════════════════════════════
+
+Dakhel et al.~\cite{dakhel2023copilot} identificaram limitações do Copilot em
+lógica complexa. Ziegler et al.~\cite{ziegler2022copilot} mediram a aceitação
+de sugestões por profissionais. Nguyen e Nadi~\cite{nguyen2022copilot} avaliaram
+corretude funcional de código gerado por IA.
+
+Diferentemente desses trabalhos, nossa abordagem é \textit{observacional} e baseada
+em mineração de repositórios reais, comparando métricas temporais antes e depois da
+introdução de sinais de IA, sem experimentos controlados.
+
+% ═══════════════════════════════════════════════════════════
+\section{Metodologia}
+% ═══════════════════════════════════════════════════════════
+
+\subsection{Coleta e Seleção}
+
+Foram selecionados 105 repositórios Python públicos do GitHub com pelo menos 1.000
+estrelas e ao menos um sinal detectado de uso de IA. A coleta foi feita via API do
+GitHub e análise estática de código para o Maintainability Index (MI).
+
+\subsection{Sinais de IA e Agrupamento}
+
+Quatro tipos de evidência foram investigados: (1)~co-autoria em \textit{commits};
+(2)~menção ao Claude; (3)~menção ao Copilot; (4)~arquivo de configuração de IA.
+O \textit{AI Score} = total de evidências encontradas. Grupos: \textbf{Baixo}
+(2--3), \textbf{Médio} (4--6), \textbf{Alto} ($\geq 7$).
+
+\subsection{Métricas por Questão de Pesquisa}
+
+\begin{itemize}[leftmargin=1.2em, itemsep=2pt, parsep=0pt, partopsep=0pt, topsep=2pt]
+  \item \textbf{RQ1 — Issues:} M1 = taxa de \textit{issues}/mês; M2 = tempo
+    médio de vida das \textit{issues} (horas).
+  \item \textbf{RQ2 — Retrabalho:} M1 = proporção de \textit{commits}
+    corretivos (\textit{fixes}); M2 = taxa de \textit{commits} de revert.
+  \item \textbf{RQ3 — Verbosidade:} M1 = linhas alteradas por \textit{commit};
+    M2 = Maintainability Index (MI)~\cite{oman1992maintainability}.
+\end{itemize}
+
+\subsection{Hipóteses}
+
+Para cada RQ definimos hipótese nula (H0) e alternativa (H1):
+
+\begin{hypbox}
+\footnotesize
+\textbf{RQ1 — H0:} sem diferença em taxa de \textit{issues} nem em tempo de resolução
+pré/pós IA.\\
+\textbf{RQ1 — H1:} IA → maior taxa de \textit{issues} e maior tempo de resolução.
+\end{hypbox}
+
+\begin{hypbox}
+\footnotesize
+\textbf{RQ2 — H0:} proporção de \textit{fixes} e reverts iguais com e sem IA.\\
+\textbf{RQ2 — H1:} IA → maior proporção de \textit{commits} corretivos e mais reverts.
+\end{hypbox}
+
+\begin{hypbox}
+\footnotesize
+\textbf{RQ3 — H0:} sem diferença no tamanho de \textit{commits} nem no MI.\\
+\textbf{RQ3 — H1:} IA → \textit{commits} maiores (mais linhas) e maior complexidade.
+\end{hypbox}
+
+\subsection{Análise}
+
+Para cada repositório, identificamos o primeiro sinal de IA (marco temporal) e
+calculamos as métricas nos períodos anterior e posterior. Adotamos a \textbf{mediana}
+como medida principal para reduzir o efeito de \textit{outliers}.
+
+% ═══════════════════════════════════════════════════════════
+\section{Caracterização do Dataset}
+% ═══════════════════════════════════════════════════════════
+
+A Tabela~\ref{tab:dataset} resume a amostra e a Tabela~\ref{tab:grupos} detalha os
+grupos de adoção.
+
+\begin{table}[t]
+\centering\caption{Caracterização geral.}\label{tab:dataset}
+\small
+\begin{tabular}{lc}
+\toprule
+\textbf{Atributo} & \textbf{Valor} \\
+\midrule
+Repositórios       & 105 \\
+Mediana de estrelas & 17.169 \\
+Mediana de idade   & 9,3 anos \\
+Mediana AI Score   & 3 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[t]
+\centering\caption{Grupos de adoção de IA.}\label{tab:grupos}
+\small\setlength{\tabcolsep}{4pt}
+\begin{tabular}{lrrrr}
+\toprule
+\textbf{Grupo} & \textbf{n} & \textbf{Med.~$\bigstar$} & \textbf{Med. Idade} & \textbf{Med. Score} \\
+\midrule
+Baixo (2--3) & 55 & 14.662 & 9,50 a & 3,0 \\
+Médio (4--6) & 32 & 18.905 & 9,00 a & 6,0 \\
+Alto ($\geq 7$) & 18 & 30.102 & 9,05 a & 8,5 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+  width=0.95\columnwidth, height=4cm,
+  ybar, bar width=20pt,
+  symbolic x coords={Baixo (2-3),Medio (4-6),Alto (7+)},
+  xtick=data,
+  xticklabel style={font=\footnotesize},
+  ymin=0, ymax=65, nodes near coords, nodes near coords style={font=\footnotesize},
+  grid=major, grid style={dotted,gray!40},
+  title={\footnotesize Distribuição por grupo de adoção de IA},
+  title style={font=\small\bfseries,at={(0.5,1.06)},anchor=south},
+  enlarge x limits=0.2,
+  ylabel={\footnotesize Repositórios}, ylabel style={font=\footnotesize},
+]
+\addplot[fill=aamber!80,draw=none] coordinates {
+  (Baixo (2-3),55) (Medio (4-6),32) (Alto (7+),18)
+};
+\end{axis}
+\end{tikzpicture}
+\caption{Repositórios por grupo.}
+\label{fig:grupos}
+\end{figure}
+
+% ═══════════════════════════════════════════════════════════
+\section{Resultados}
+% ═══════════════════════════════════════════════════════════
+
+\subsection{RQ1 — Taxa de Issues e Tempo de Resolução}
+
+\begin{table}[t]
+\centering\caption{RQ1 — medianas antes e depois.}\label{tab:rq1}
+\small\setlength{\tabcolsep}{4pt}
+\begin{tabular}{lrrr}
+\toprule
+\textbf{Métrica} & \textbf{Antes} & \textbf{Depois} & \textbf{$\Delta$} \\
+\midrule
+Taxa issues/mês & 66,50 & 18,83 & \textcolor{ared}{$-$71,7\%} \\
+Tempo resolução (h) & 9.898,01 & 5.645,14 & \textcolor{ared}{$-$42,9\%} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+  pairbar,
+  ylabel={\footnotesize Taxa issues/mês},
+  title={\footnotesize RQ1 — M1: Taxa de issues/mês},
+  ymax=280, legend entries={Antes,Depois},
+]
+\addplot coordinates { (Mediana,66.5) (Media,234.31) };
+\addplot coordinates { (Mediana,18.83) (Media,75.39) };
+\end{axis}
+\end{tikzpicture}
+\caption{RQ1 — M1: taxa de issues/mês antes e depois.}
+\label{fig:rq1m1}
+\end{figure}
+
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+  pairbar,
+  ylabel={\footnotesize Tempo de resolução (h)},
+  title={\footnotesize RQ1 — M2: Tempo médio de resolução},
+  ymax=14000, legend entries={Antes,Depois},
+]
+\addplot coordinates { (Mediana,9898) (Media,12338) };
+\addplot coordinates { (Mediana,5645) (Media,9290) };
+\end{axis}
+\end{tikzpicture}
+\caption{RQ1 — M2: tempo médio de resolução (horas) antes e depois.}
+\label{fig:rq1m2}
+\end{figure}
+
+\textbf{Veredicto — RQ1:} H1 \textbf{rejeitada}. Ambas as métricas diminuem
+pós-IA (taxa $-71{,}7\%$; tempo $-42{,}9\%$), contrariando a hipótese de que
+a IA aumentaria o fluxo de \textit{issues}.
+
+\subsection{RQ2 — Retrabalho Corretivo}
+
+\begin{table}[t]
+\centering\caption{RQ2 — medianas antes e depois.}\label{tab:rq2}
+\small\setlength{\tabcolsep}{4pt}
+\begin{tabular}{lrrr}
+\toprule
+\textbf{Métrica} & \textbf{Antes} & \textbf{Depois} & \textbf{$\Delta$} \\
+\midrule
+\% Fixes  & 32,12 & 36,07 & \textcolor{agreen}{$+$12,3\%} \\
+\% Reverts & 1,10 &  1,24 & \textcolor{agreen}{$+$12,7\%} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+  pairbar,
+  ylabel={\footnotesize \% Fixes (mediana)},
+  title={\footnotesize RQ2 — M1: Proporção de commits corretivos},
+  ymax=44, legend entries={Antes,Depois},
+]
+\addplot coordinates { (Mediana,32.12) (Media,33.45) };
+\addplot coordinates { (Mediana,36.07) (Media,38.76) };
+\end{axis}
+\end{tikzpicture}
+\caption{RQ2 — M1: percentual de \textit{commits} de correção antes e depois.}
+\label{fig:rq2m1}
+\end{figure}
+
+\textbf{Veredicto — RQ2:} H1 \textbf{parcialmente suportada}. Tanto
+\textit{fixes} ($+12{,}3\%$) quanto \textit{reverts} ($+12{,}7\%$) aumentam
+após a adoção de IA, em linha com a hipótese alternativa.
+
+\subsection{RQ3 — Verbosidade dos Commits}
+
+\begin{table}[t]
+\centering\caption{RQ3 — medianas antes e depois.}\label{tab:rq3}
+\small\setlength{\tabcolsep}{4pt}
+\begin{tabular}{lrrr}
+\toprule
+\textbf{Métrica} & \textbf{Antes} & \textbf{Depois} & \textbf{$\Delta$} \\
+\midrule
+Linhas/commit    & 193,79 & 217,49 & \textcolor{agreen}{$+$12,2\%} \\
+MI médio (méd.) & 63,43  & 60,90  & \textcolor{ared}{$-$2,53} \\
+MI (mediana)    & 60,29  & 58,50  & \textcolor{ared}{$-$1,80} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+  pairbar,
+  ylabel={\footnotesize Linhas alteradas/commit},
+  title={\footnotesize RQ3 — M1: Tamanho médio do commit},
+  ymax=700, legend entries={Antes,Depois},
+]
+\addplot coordinates { (Mediana,193.79) (Media,573.01) };
+\addplot coordinates { (Mediana,217.49) (Media,591.69) };
+\end{axis}
+\end{tikzpicture}
+\caption{RQ3 — M1: linhas alteradas por \textit{commit} antes e depois.}
+\label{fig:rq3m1}
+\end{figure}
+
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+  pairbar,
+  ylabel={\footnotesize Maintainability Index},
+  title={\footnotesize RQ3 — M2: Maintainability Index},
+  ymin=54, ymax=68, legend entries={Antes,Depois},
+]
+\addplot coordinates { (Mediana,60.29) (Media,63.43) };
+\addplot coordinates { (Mediana,58.50) (Media,60.90) };
+\end{axis}
+\end{tikzpicture}
+\caption{RQ3 — M2: Maintainability Index antes e depois.}
+\label{fig:rq3m2}
+\end{figure}
+
+\textbf{Veredicto — RQ3:} H1 \textbf{parcialmente suportada}. Linhas por
+\textit{commit} aumentam $+12{,}2\%$ (suporta H1 para tamanho), mas o MI cai
+ligeiramente (não suporta H1 para complexidade — código não fica mais simples).
+
+% ═══════════════════════════════════════════════════════════
+\section{Discussão}
+% ═══════════════════════════════════════════════════════════
+
+\textbf{RQ1 — achado contraintuitivo.} A hipótese alternativa previa mais
+\textit{issues} e mais tempo de resolução após IA. Os dados mostram o oposto.
+Possíveis explicações: (i)~a IA aumenta eficiência de triagem e resolução;
+(ii)~o código gerado por IA apresenta menos defeitos observáveis;
+(iii)~o período pós-sinal é naturalmente mais curto, acumulando menos eventos;
+(iv)~projetos mais maduros tendem a ter atividade decrescente
+independentemente da IA.
+
+\textbf{RQ2 — retrabalho leve, mas consistente.} Ambas as métricas sobem
+de forma modesta (~12\%). O aumento de \textit{fixes} e \textit{reverts}
+sugere que código assistido por IA pode exigir ajustes posteriores, mas
+o efeito não é dramático.
+
+\textbf{RQ3 — commits maiores, sem ganho de qualidade estrutural.} O
+aumento de linhas por \textit{commit} pode refletir que a IA gera blocos
+de código maiores por interação. A queda no MI, embora pequena (~3\%),
+indica que a qualidade estrutural não melhora com a IA — o código gerado
+pode ser ligeiramente mais difícil de manter.
+
+% ═══════════════════════════════════════════════════════════
+\section{Ameaças à Validade}
+% ═══════════════════════════════════════════════════════════
+
+\textbf{Interna:} estudo observacional sem grupo de controle; causalidade não pode
+ser inferida. Variáveis de confusão (maturidade, mudança de equipe) não controladas.
+
+\textbf{Construto:} AI Score mede evidência, não intensidade de uso. MI é sensível
+à linguagem e às ferramentas de análise.
+
+\textbf{Externa:} amostra restrita a Python com $\geq 1{.}000$ estrelas; pode não
+generalizar para projetos menores ou outras linguagens.
+
+\textbf{Conclusão:} mediana mitiga \textit{outliers}, mas repositórios com
+comportamento atípico ainda podem influenciar os resultados.
+
+% ═══════════════════════════════════════════════════════════
+\section{Conclusão}
+% ═══════════════════════════════════════════════════════════
+
+Este trabalho analisou empiricamente 105 repositórios Python quanto ao impacto
+de ferramentas de IA. Os resultados são:
+
+\begin{itemize}[leftmargin=1.2em,itemsep=2pt,topsep=2pt]
+  \item \textbf{RQ1:} taxa de \textit{issues} e tempo de resolução
+    \textbf{diminuem} pós-IA — H1 rejeitada.
+  \item \textbf{RQ2:} \textit{fixes} e \textit{reverts} \textbf{aumentam
+    moderadamente} — H1 parcialmente suportada.
+  \item \textbf{RQ3:} \textit{commits} \textbf{ficam maiores}, mas MI
+    \textbf{cai levemente} — H1 parcialmente suportada.
+\end{itemize}
+
+Trabalhos futuros devem incluir grupos de controle, análise qualitativa de
+\textit{commits} assistidos por IA e replicação em outras linguagens.
+
+% ── Referências ───────────────────────────────────────────
+\bibliographystyle{plain}
+\begin{thebibliography}{9}
+
+\bibitem{dakhel2023copilot}
+  A.~M. Dakhel et al.,
+  ``GitHub Copilot AI pair programmer: Asset or Liability?''
+  \textit{J.\ Syst.\ Softw.}, 203:111806, 2023.
+
+\bibitem{ziegler2022copilot}
+  A.~Ziegler et al.,
+  ``Productivity Assessment of Neural Code Completion.''
+  In: \textit{Proc.\ MAPS}, 2022.
+
+\bibitem{nguyen2022copilot}
+  N.~Nguyen e S.~Nadi,
+  ``An empirical evaluation of GitHub Copilot's code suggestions.''
+  In: \textit{Proc.\ MSR}, pp.\ 1--5, 2022.
+
+\bibitem{oman1992maintainability}
+  P.~Oman e J.~Hagemeister,
+  ``Metrics for assessing a software system's maintainability.''
+  In: \textit{Proc.\ ICSM}, pp.\ 337--344, 1992.
+
+\bibitem{kalliamvakou2014github}
+  E.~Kalliamvakou et al.,
+  ``The promises and perils of mining GitHub.''
+  In: \textit{Proc.\ MSR}, pp.\ 92--101, 2014.
+
+\end{thebibliography}
+
+\end{document}
